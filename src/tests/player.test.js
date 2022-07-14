@@ -10,18 +10,16 @@ describe("Player tests", () => {
     test("Place ship at [2,2], attack it", () => {
         gameboard = Gameboard([[[2,2]]]);
         player = Player(name, gameboard);
-        player.isTurn = true;
         player.attack(2,2);
         expect(gameboard.checkIfAllSunk()).toBe(true);
-        expect(player.isTurn).toBe(true);
+        expect(player.getIsTurn()).toBe(true);
     });
 
     test("Place ship at [0,0], [0, 1], [0, 2] and attack [0,3]", () => {
         gameboard = Gameboard([[[0,0], [0,1], [0,2]]]);
-        player.isTurn = true;
         player.attack(0,3);
         expect(gameboard.checkIfAllSunk()).toBe(false);
-        expect(player.isTurn).toBe(false);
+        expect(player.getIsTurn()).toBe(false);
     });
 
 });
@@ -32,7 +30,6 @@ describe("Bot tests", () => {
     test("Place ship at [2,2], [2,3], attack random legal position", () => {
         gameboard = Gameboard([[[2,2],[2,3]]])
         bot = Bot(gameboard);
-        bot.isTurn = true;
         let next = bot.decideAttackLocation();
         expect(gameboard.legalMoves.includes(next)).toBe(true);
         expect(gameboard.checkIfAllSunk()).toBe(false);
