@@ -5,7 +5,7 @@ const Player = (name, enemyGameboard, isTurn) => {
     const getIsTurn = () => isTurn;
 
     const attack = (x, y) => {
-        if(isTurn && !(enemyGameboard.checkIfLocationHitAndMissed(x, y) || enemyGameboard.checkIfLocationHitWithShip(x, y))) {
+        if(checkIfAbleToAttackLocation()) {
             enemyGameboard.receiveAttack(x, y);
             if(enemyGameboard.checkIfLocationHitAndMissed(x, y)) isTurn = false;
             else isTurn = true;
@@ -13,7 +13,13 @@ const Player = (name, enemyGameboard, isTurn) => {
         else console.log("Unable to carry out the last attack order");
     }
 
-    let player = {name, getIsTurn, attack};
+    const checkIfAbleToAttackLocation = (x, y) => {
+        return isTurn && !(enemyGameboard.checkIfLocationHitAndMissed(x, y) || enemyGameboard.checkIfLocationHitWithShip(x, y))
+    }
+
+    const checkIfWon = () => enemyGameboard.checkIfAllSunk();
+
+    let player = {name, getIsTurn, attack, checkIfAbleToAttackLocation, checkIfWon};
     return player
 }
 
