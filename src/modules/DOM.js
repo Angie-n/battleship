@@ -1,7 +1,7 @@
 import { Gameboard } from "./gameboard";
 import { Player, Bot } from "./player";
 
-const shipSizesToAdd = [1, 2, 2, 2, 3, 3, 4];
+const shipSizesToAdd = [1, 2, 2, 3, 3, 4, 4];
 
 const findAdjacentPositions = index1D => {
     const findLeft = () => {
@@ -118,6 +118,7 @@ const randomizeShipPlacement = boardContainer => {
 
         if(s === 1) {
             let div = allGridSpaces[position[0]];
+            coordinates.push([position[0]]);
             div.classList.add("revealed-single-ship"); 
             appendShipIcon(div);
             appendShipIcon(div);
@@ -126,8 +127,10 @@ const randomizeShipPlacement = boardContainer => {
             let isHorizontal;
             if(position[0] === position[1] - 1) isHorizontal = true;
             else isHorizontal = false;
+            let shipLocation = [];
             position.forEach((p, i) => {
                 let div = allGridSpaces[p];
+                shipLocation.push(p);
                 if(i === 0 || i === position.length - 1) {
                     appendShipIcon(div);
                     if(i === 0 && isHorizontal) div.classList.add("revealed-ship-left");
@@ -137,9 +140,18 @@ const randomizeShipPlacement = boardContainer => {
                 }
                 else div.classList.add("revealed-ship-middle");
             });
+            coordinates.push(shipLocation);
         }
     });
     return {coordinates};
+}
+
+const clearBoard = board => {
+    let divs = board.getElementsByTagName("div");
+    for(let i = 0; i < divs.length; i++) {
+        for(let c = 0; c < divs[i].classList.length; c++) divs[i].classList.remove(divs[i].classList.item(0));
+        divs[i].innerHTML = "";
+    }
 }
 
 
@@ -158,5 +170,55 @@ const initialSetup = (() => {
     }
 
     const setupBoard = document.getElementById("setup-board");
-    randomizeShipPlacement(setupBoard);
+    let playerCoordinates;
+    let playerBoard;
+    let enemyCoordinates;
+    let enemyBoard;
+
+    function convert1Dto2DCoordinates(coordinates1D) {
+        let coordinates = [];
+        for(let oi = 0; oi < coordinates1D.length; oi++) {
+            coordinates.push([]);
+            for(let ii = 0; ii < coordinates1D[oi].length; ii++) {
+                coordinates[oi].push([coordinates1D[oi][ii] % 10, Math.floor(coordinates1D[oi][ii] / 10)]);
+            }
+        }
+        return coordinates;
+    }
+
+    //updates player coordinates
+    document.getElementById("randomizer-btn").onclick = () => {
+        clearBoard(setupBoard);
+        playerCoordinates = randomizeShipPlacement(setupBoard).coordinates;
+    }
+
+    //creates board for player and its DOM representation
+    function useSetupToSetUpPlayerBoard() {
+        playerCoordinates = convert1Dto2DCoordinates(playerCoordinates);
+        playerBoard = Gameboard(playerCoordinates);
+        let playerBoardDOM = document.getElementById("player-board");
+        playerBoardDOM.innerHTML = setupBoard.innerHTML;
+        clearBoard(setupBoard);
+    }
+
+    //creates board for enemy and its DOM representation
+    function randomlySetupEnemyBoard() {
+        let enemyBoardDOM = document.getElementById("bot-board");
+        let coordinates1D = randomizeShipPlacement(setupBoard).coordinates;
+        enemyCoordinates = convert1Dto2DCoordinates(coordinates1D);
+        enemyBoard = Gameboard(enemyCoordinates);
+        enemyBoardDOM.innerHTML = setupBoard.innerHTML;
+        clearBoard(setupBoard);
+    }
+
+    document.getElementById("start-game-btn").onclick = () => {
+        if(document.getElementById("ship-pieces").getElementsByTagName("div").length === 0) {
+            document.getElementById("game-setup-container").style.display = "none";
+            document.getElementById("game-container").style.display = "block";
+            useSetupToSetUpPlayerBoard();
+            randomlySetupEnemyBoard();
+            console.log(enemyBoard);
+            console.log(playerBoard);
+        }
+    }
 })();
