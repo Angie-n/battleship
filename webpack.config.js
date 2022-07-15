@@ -7,8 +7,5 @@ module.exports = {
    filename: 'main.js',
    path: path.resolve(__dirname, 'dist'),
  },
- scripts: {
-    "watch": "webpack --watch",
- },
  devtool: 'eval',
 };
