@@ -1,0 +1,262 @@
+* {
+    border: 0;
+    margin: 0;
+}
+
+@font-face {
+    font-family: alfa-slab-one;
+    src: url("./assets/fonts/AlfaSlabOne-Regular.ttf");
+}
+
+@font-face {
+    font-family: orbitron;
+    src: url("./assets/fonts/Orbitron-Regular.ttf");
+}
+
+:root {
+    --ship-color: rgb(31, 36, 31);
+    --radio-color: rgb(28, 27, 27);
+}
+
+body {
+    font-size: 10px;
+    background-color: rgb(0, 105, 148);
+    color: white;
+}
+
+h1 {
+    font-size: 8em;
+    text-align: center;
+    font-family: alfa-slab-one, Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    letter-spacing: 8px;
+    margin-bottom: 20px;
+}
+
+button[type="submit"] {
+    border-radius: 10px;
+    border: 1px solid white;
+}
+
+#setup-form {
+    width: 100%;
+    position: absolute;
+    z-index: 1;
+}
+
+#setup-form p {
+    margin-bottom: 10px;
+}
+
+#ask-for-name {
+    margin: auto;
+    background-color: var(--radio-color);
+    width: max(40%, 400px);
+    font-size: 1.8em;
+    padding: 20px;
+}
+
+#ask-for-name label {
+    font-size: 2em;
+}
+
+#ship-placement {
+    filter: blur(2px);
+}
+
+#setup-board {
+    margin: auto;
+}
+
+#board-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 50px;
+}
+
+.gameboard {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-rows: repeat(10, minmax(0, 1fr));
+    width: 40vw;
+    min-width: 300px;
+    max-width: 600px;
+    height: 40vw;
+    min-height: 300px;
+    max-height: 600px;
+}
+
+.gameboard div {
+    position: relative;
+    border: 1px solid rgb(183, 181, 181);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(1.8em, 2vw, 4em);
+}
+
+#commentary-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+}
+
+#fake-radio {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    background-color: var(--radio-color);
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 15px;
+    margin: 20px 0 20px 0;
+    padding: 20px 0 20px 0;
+}
+
+#radio-screen {
+    position: relative;
+    width: 80%;
+    height: 100px;
+    background-color: rgb(49, 148, 115);
+    font-family: orbitron, 'Courier New', Courier, monospace;
+    margin-bottom: 10px;
+}
+
+#radio-screen p {
+    position: absolute;
+}
+
+#radio-screen p:first-child {
+    font-size: 2.5em;
+    bottom: 10px;
+    left: 10px;
+}
+
+#win-stat {
+    font-size: 7em;
+    right: 20%;
+    bottom: 0;
+}
+
+#rounds-played {
+    font-size: 4em;
+    top: 0;
+    right: 5%;
+}
+
+#commentary-msg {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    font-size: 2em;
+    width: 90%;
+    height: 90px;
+}
+
+#new-game-btn {
+    display: none;
+    border: 1px solid gray;
+    background-color: inherit;
+    color: white;
+    font-size: 2em;
+    padding: 5px;
+    width: 25%;
+}
+
+.hit-ship {
+    color: rgb(242, 145, 41);
+}
+
+.revealed-ship-top i, .revealed-ship-bottom i, .revealed-ship-middle i, .revealed-ship-right i, .revealed-ship-left i, .revealed-single-ship i{
+    position: relative;
+    color: var(--ship-color);
+    font-size: clamp(32px, 4vw, 65px);
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+div .revealed-ship-middle {
+    background-color: var(--ship-color);
+}
+
+.revealed-ship-top i{
+    top: 2px;
+    transform: rotate(-90deg);
+}
+
+.revealed-ship-bottom i {
+    top: -2px;
+    transform: rotate(90deg);
+}
+
+.revealed-ship-left i {
+    right: 1px;
+    transform: rotate(180deg);
+}
+
+.revealed-ship-right i {
+    right: -1px;
+}
+
+.revealed-single-ship {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100;
+}
+
+.revealed-single-ship i {
+    font-size: 1.2em;
+    transform: scale(1, 1.5);
+}
+
+.revealed-single-ship i:first-child {
+    transform: scale(1, 1.5) rotate(180deg);
+    left: 2px;
+}
+
+.revealed-single-ship i:nth-child(2) {
+    right: 2px;
+}
+
+@media only screen and (min-width: 1300px) {
+    #board-container {
+        justify-content: center;
+    }
+
+    .gameboard {
+        margin: 0 80px 0 80px;
+    }
+}
+
+@media only screen and (max-width: 640px) {
+    h1 {
+        font-size: 13vw;
+        letter-spacing: 2px;
+    }
+
+    #board-container {
+        flex-direction: column;
+    }
+
+    .gameboard {
+        margin: 20px;
+    }
+
+    #fake-radio {
+        width: 100%;
+        font-size: 0.8em;
+    }
+}
+
+@media only screen and (max-width: 420px) {
+    #ask-for-name {
+        width: 100%;
+    }
+}
