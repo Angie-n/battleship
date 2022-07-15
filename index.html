@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="main.js" defer></script>
+    <script src="https://kit.fontawesome.com/bc1bc2b6f5.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../src/style.css">
+    <title>Battleship</title>
+</head>
+<body>
+    <header><h1>BATTLESHIP</h1></header>
+    <div id="game-setup-container">
+        <form id="setup-form">
+            <div id="ask-for-name"> 
+                <label for="name">Enter your Name</label>
+                <p>Great to have you on board, captain. Your tactical abilities are the only thing keeping us afloat! Anyways, what was your name again?</p>
+                <input id="name" type="text" placeholder="Your Name"> 
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+        <div id="ship-placement">
+            <h2></h2>
+            <div class="gameboard-container">
+                <div id="setup-board" class="gameboard">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="game-container" style="display: none">
+        <div id="commentary-box">
+            <div id="fake-radio">
+                <div id="radio-screen"><p>CH</p><p id="win-stat">00</p><p id="rounds-played">00</p></div>
+                <p id="commentary-msg">This is a message.</p>
+                <button id="new-game-btn">New Game</button>
+            </div>
+        </div>
+        <div id="board-container">
+            <div class="gameboard-container">
+                <div id="player-board" class="gameboard"></div>
+            </div>
+            <div class="gameboard-container">
+                <div id="bot-board" class="gameboard"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
