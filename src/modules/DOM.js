@@ -52,12 +52,14 @@ const findAdjacentPositions = index1D => {
 
 //expect coordinate to be 1D.
 const checkIfCoordinateAllowsShip = coordinate => {
-    let squares = document.getElementById("setup-board").getElementsByTagName("div");
-    if (squares[coordinate].classList.length != 0) return false;
+    let squares = document.querySelectorAll("#setup-board > div");
+    console.log("Coordinate: " + coordinate);
+    console.log(squares[coordinate]);
+    if (squares[coordinate].classList.length != 0 && squares[coordinate].classList.item(0) != "hover-effect") return false;
     let surrounding = findAdjacentPositions(coordinate);
 
     function checkIfOccupied(otherPosition) {
-        if(otherPosition != null && squares[otherPosition].classList.length != 0) return true;
+        if(otherPosition != null && squares[otherPosition].classList.length != 0 && squares[otherPosition].classList.item(0) != "hover-effect") return true;
         return false;
     }
 
@@ -65,22 +67,22 @@ const checkIfCoordinateAllowsShip = coordinate => {
     return true;
 }
 
-//expect coordinate to be 1D. Returns position(s) if ship can be added with coordinate as a starting point from left to right or top to bottom.
-const getPositionsShipCanFitFromStartingIndex = (shipSize, coordinate) => {
-    let allowedIndexes = [];
-    if(checkIfCoordinateAllowsShip(coordinate) == false) return allowedIndexes;
-
+//Horizontal and vertical does not check starting point.
+function findHorizontalCoordinatesIfFit(shipSize, coordinate) {
     let horizontalExtreme = coordinate + shipSize - 1;
-    if(Math.floor(coordinate / 10 ) === Math.floor((horizontalExtreme) / 10) && horizontalExtreme < 100) {
+    if(Math.floor(coordinate / 10) === Math.floor((horizontalExtreme) / 10) && horizontalExtreme < 100) {
         let i = 1;
         let horizontalIndexes = [coordinate];
         while(i < shipSize && checkIfCoordinateAllowsShip(coordinate + i)) {
             horizontalIndexes.push(coordinate + i);
             i++;
         }
-        if(i === shipSize) allowedIndexes.push(horizontalIndexes);
+        if(i === shipSize) return horizontalIndexes;
     }
+    return null;
+}
 
+function findVerticalCoordinatesIfFit(shipSize, coordinate) {
     let verticalExtreme = coordinate + (10 * (shipSize - 1));
     if(coordinate % 10 === verticalExtreme % 10 && verticalExtreme < 100) {
         let i = 1;
@@ -89,22 +91,37 @@ const getPositionsShipCanFitFromStartingIndex = (shipSize, coordinate) => {
             verticalIndexes.push(coordinate + i * 10);
             i++;
         }
-        if(i === shipSize) allowedIndexes.push(verticalIndexes);
+        if(i === shipSize) return verticalIndexes;
     }
+    return null;
+}
+
+//expect coordinate to be 1D. Returns position(s) if ship can be added with coordinate as a starting point from left to right or top to bottom.
+const getPositionsShipCanFitFromStartingIndex = (shipSize, coordinate) => {
+    let allowedIndexes = [];
+    if(checkIfCoordinateAllowsShip(coordinate) == false) return allowedIndexes;
+
+    let horizontalCoordinates = findHorizontalCoordinatesIfFit(shipSize, coordinate);
+    if(horizontalCoordinates != null) allowedIndexes.push(horizontalCoordinates);
+
+    let verticalCoordinates = findVerticalCoordinatesIfFit(shipSize, coordinate);
+    if(verticalCoordinates != null) allowedIndexes.push(verticalCoordinates);
+    
     return allowedIndexes;
 }
 
-const randomizeShipPlacement = boardContainer => {
+const randomizeShipPlacement = () => {
     let coordinates = [];
+    document.getElementById("ship-pieces").innerHTML = "";
 
-    const appendShipIcon = div => {
+    const appendShipIcon = (div, iconClass) => {
         let icon = document.createElement("i");
         icon.classList.add("fa-solid");
-        icon.classList.add("fa-play");
+        icon.classList.add(iconClass);
         div.append(icon);
     }
 
-    let allGridSpaces = boardContainer.getElementsByTagName("div");
+    let allGridSpaces = document.querySelectorAll("#setup-board > div");
     let availableGridIndexes = [...allGridSpaces].map((s,i) => i);
     shipSizesToAdd.forEach((s, i) => {
         let possiblePositions;
@@ -120,8 +137,7 @@ const randomizeShipPlacement = boardContainer => {
             let div = allGridSpaces[position[0]];
             coordinates.push([position[0]]);
             div.classList.add("revealed-single-ship"); 
-            appendShipIcon(div);
-            appendShipIcon(div);
+            appendShipIcon(div, "fa-diamond");
         }
         else {
             let isHorizontal;
@@ -132,7 +148,7 @@ const randomizeShipPlacement = boardContainer => {
                 let div = allGridSpaces[p];
                 shipLocation.push(p);
                 if(i === 0 || i === position.length - 1) {
-                    appendShipIcon(div);
+                    appendShipIcon(div, "fa-play");
                     if(i === 0 && isHorizontal) div.classList.add("revealed-ship-left");
                     else if (i === 0 && !isHorizontal) div.classList.add("revealed-ship-top");
                     else if (i === position.length - 1 && isHorizontal) div.classList.add("revealed-ship-right");
@@ -147,10 +163,10 @@ const randomizeShipPlacement = boardContainer => {
 }
 
 const clearBoard = board => {
-    let divs = board.getElementsByTagName("div");
+    let divs = board.querySelectorAll("#" + board.id +  " > div");
     for(let i = 0; i < divs.length; i++) {
-        for(let c = 0; c < divs[i].classList.length; c++) divs[i].classList.remove(divs[i].classList.item(0));
-        divs[i].innerHTML = "";
+        let cleanDiv = document.createElement("div");
+        divs[i].replaceWith(cleanDiv);
     }
 }
 
@@ -170,10 +186,150 @@ const initialSetup = (() => {
     }
 
     const setupBoard = document.getElementById("setup-board");
-    let playerCoordinates;
+    let playerCoordinates = [];
     let playerBoard;
     let enemyCoordinates;
     let enemyBoard;
+
+    const drag = (() => {
+        let initialDragBox = document.getElementById("ship-pieces"); //allow for drags back in box
+        let draggables = document.getElementsByClassName("draggable");
+        let dragDropOffs = document.querySelectorAll("#setup-board > div");
+
+        function removeDragStyles(divArr) {
+            divArr.forEach(h => {
+                [...h.getElementsByClassName("hover-effect")].forEach(he => {
+                    he.remove();
+                });
+            });
+        }
+
+        [...draggables].forEach((d,i) => {
+            let shipSection = d.getElementsByTagName("div");
+            [...shipSection].forEach(s => s.classList.add("draggable-ship-" + i));
+
+            d.ondragstart = e => {
+                d.classList.add("grabbed");
+                e.dataTransfer.setData("ship", d.innerHTML);
+                e.dataTransfer.setData("size", [...shipSection].length);
+                e.dataTransfer.setData("isHorizontal", [...shipSection][0].classList.item(0) === "revealed-ship-left");
+            }
+
+            d.ondragend = e => {
+                d.classList.remove("grabbed");
+                removeDragStyles([...dragDropOffs]);
+            }
+
+            let shipIcons = d.getElementsByTagName("i");
+            if(shipIcons.length > 1) {
+                d.onclick = () => {
+                    if(d.style.flexDirection != "column") {
+                        d.style.flexDirection = "column";
+                        shipSection[0].classList.add("revealed-ship-top");
+                        shipSection[0].classList.remove("revealed-ship-left");
+                        shipSection[shipSection.length - 1].classList.add("revealed-ship-bottom");
+                        shipSection[shipSection.length - 1].classList.remove("revealed-ship-right");
+                    }
+                    else {
+                        d.style.flexDirection = "row";
+                        shipSection[0].classList.add("revealed-ship-left");
+                        shipSection[0].classList.remove("revealed-ship-top");
+                        shipSection[shipSection.length - 1].classList.add("revealed-ship-right");
+                        shipSection[shipSection.length - 1].classList.remove("revealed-ship-bottom");
+                    }
+                }
+            }
+        });
+
+        let lastHoveredOverDivs;
+        [...dragDropOffs].forEach((d,i) => {
+            let validPosition;
+            let hoveredOverDivs = [];
+
+            function createDivForHover(isValid) {
+                let hoverDiv = document.createElement("div");
+                hoverDiv.classList.add("hover-effect");
+                if(isValid) hoverDiv.style.backgroundColor = "white";
+                else hoverDiv.style.backgroundColor = "red";
+                return hoverDiv;
+            }
+
+            d.ondragenter = e => {
+                e.preventDefault();
+                if(lastHoveredOverDivs != undefined) removeDragStyles(lastHoveredOverDivs);
+                hoveredOverDivs = [];
+
+                let grabbedItem = document.getElementsByClassName("grabbed")[0];
+                let size = [...grabbedItem.getElementsByTagName("div")].length;
+                let isHorizontal = grabbedItem.getElementsByTagName("div")[0].classList.item(0) === "revealed-ship-left";
+
+                if(isHorizontal && (!checkIfCoordinateAllowsShip(i) || findHorizontalCoordinatesIfFit(size, i) == null)) {
+                    console.log("No horizontal spots");
+                    let offset = 0;
+                    while((i + offset) < 100 && offset < size && Math.floor(i / 10) === Math.floor((i + offset) / 10)) {
+                        let div = dragDropOffs[i + offset];
+                        div.append(createDivForHover(false));
+                        hoveredOverDivs.push(div);
+                        offset++;
+                    }
+                    validPosition = false;
+                }
+                else if(!isHorizontal && (!checkIfCoordinateAllowsShip(i) || findVerticalCoordinatesIfFit(size, i) == null)) {
+                    console.log("No vertical spots");
+                    let offset = 0;
+                    while((i + offset) < 100 && offset < size * 10 && i % 10 === (i + offset) % 10){
+                        let div = dragDropOffs[i + offset];
+                        div.append(createDivForHover(false));
+                        hoveredOverDivs.push(div);
+                        offset += 10;
+                    } 
+                    validPosition = false;
+                }
+                else {
+                    let max = size * 10;
+                    let change = 10;
+                    if(isHorizontal) {
+                        change = 1;
+                        max = size;
+                    }
+
+                    for(let offset = 0; offset < max; offset += change) {
+                        let div = dragDropOffs[i + offset];
+                        div.append(createDivForHover(true));
+                        hoveredOverDivs.push(div);
+                    }
+                    validPosition = true;
+                }
+                lastHoveredOverDivs = hoveredOverDivs;
+            }
+
+            d.ondragover = e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+            }
+
+            d.ondrop = e => {
+                e.preventDefault();
+                console.log("dropped");
+                
+                if(validPosition) {
+                    let ship = e.dataTransfer.getData("ship");
+                    let shipDiv = document.createElement("div");
+                    shipDiv.innerHTML = ship;
+                    let shipSections = shipDiv.getElementsByTagName("div");
+                    hoveredOverDivs.forEach(h => {
+                        h.replaceWith(shipSections[0]);
+                    });
+                    document.getElementsByClassName("grabbed")[0].remove();
+                }
+                
+                let coordinates = [];
+                hoveredOverDivs.forEach((h,offset) => coordinates.push(i + offset));
+                playerCoordinates.push(coordinates);
+                hoveredOverDivs = [];
+            }
+        });
+    })();
 
     function convert1Dto2DCoordinates(coordinates1D) {
         let coordinates = [];
@@ -189,7 +345,8 @@ const initialSetup = (() => {
     //updates player coordinates
     document.getElementById("randomizer-btn").onclick = () => {
         clearBoard(setupBoard);
-        playerCoordinates = randomizeShipPlacement(setupBoard).coordinates;
+        console.log(setupBoard.innerHTML);
+        playerCoordinates = randomizeShipPlacement().coordinates;
     }
 
     //creates board for player and its DOM representation
@@ -217,8 +374,6 @@ const initialSetup = (() => {
             document.getElementById("game-container").style.display = "block";
             useSetupToSetUpPlayerBoard();
             randomlySetupEnemyBoard();
-            console.log(enemyBoard);
-            console.log(playerBoard);
         }
     }
 })();
