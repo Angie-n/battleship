@@ -340,6 +340,61 @@ const initialSetup = (() => {
                     });
                 }
 
+                s.onclick = e => {
+                    let isHorizontal = specialClassShips[0].classList.contains("revealed-ship-left");
+                    let index = Array.prototype.indexOf.call(document.querySelectorAll("#setup-board > div"), specialClassShips[0]);
+                    let size = specialClassShips.length;
+
+                    specialClassShips.forEach(s => s.classList.add("original-section"));
+
+                    let originalCoordinates;
+                    let newCoordinates;
+                    if(isHorizontal) {
+                        originalCoordinates = findHorizontalCoordinatesIfFit(size, index);
+                        newCoordinates = findVerticalCoordinatesIfFit(size, index);
+                    }
+                    else {
+                        originalCoordinates = findVerticalCoordinatesIfFit(size, index);
+                        newCoordinates = findHorizontalCoordinatesIfFit(size, index);
+                    }
+
+                    specialClassShips.forEach(s => s.classList.remove("original-section"));
+
+                    console.log("New: " + newCoordinates);
+                    console.log("Old: " + originalCoordinates);
+
+                    if(newCoordinates != null)  {
+                        if(isHorizontal) {
+                            specialClassShips[0].classList.add("revealed-ship-top");
+                            specialClassShips[0].classList.remove("revealed-ship-left");
+                            specialClassShips[specialClassShips.length - 1].classList.add("revealed-ship-bottom");
+                            specialClassShips[specialClassShips.length - 1].classList.remove("revealed-ship-right");
+                        }
+                        else {
+                            specialClassShips[0].classList.remove("revealed-ship-top");
+                            specialClassShips[0].classList.add("revealed-ship-left");
+                            specialClassShips[specialClassShips.length - 1].classList.remove("revealed-ship-bottom");
+                            specialClassShips[specialClassShips.length - 1].classList.add("revealed-ship-right");
+                        }
+                        newCoordinates.forEach((c,i) => {
+                            if(i !== 0) {
+                                let newLocation = document.querySelectorAll("#setup-board > div")[c];
+                                let oldLocation = specialClassShips[i];
+                                for(let cl = 0; cl < oldLocation.classList.length; cl++) {
+                                    newLocation.classList.add(oldLocation.classList.item(cl));
+                                }
+                                newLocation.innerHTML = oldLocation.innerHTML;
+                                
+                                let replacement = document.createElement("div");
+                                document.querySelectorAll("#setup-board > div")[originalCoordinates[i]].replaceWith(replacement);
+                                addDropOffEvent(replacement, originalCoordinates[i]);
+                            }
+                        });
+                    }
+                
+                    sectionDragEvents();
+                }
+
                 s.ondragstart = e => {
                     let div = document.createElement("div");
                     div.classList.add("drag-image");
