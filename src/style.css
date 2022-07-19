@@ -15,6 +15,7 @@
 
 :root {
     --ship-color: rgb(31, 36, 31);
+    --light-ship-color: rgb(78, 78, 78);
     --radio-color: rgb(28, 27, 27);
     --green-screen: rgb(49, 148, 115);
 }
@@ -138,11 +139,11 @@ button[type="submit"] {
 }
 
 .draggable:hover div i{
-    color: rgb(55, 55, 55);
+    color: var(--light-ship-color);
 }
 
 .draggable:hover .revealed-ship-middle{
-    background-color: rgb(55, 55, 55);
+    background-color: var(--light-ship-color);
 }
 
 .hover-effect {
