@@ -55,11 +55,11 @@ const checkIfCoordinateAllowsShip = coordinate => {
     let squares = document.querySelectorAll("#setup-board > div");
     console.log("Coordinate: " + coordinate);
     console.log(squares[coordinate]);
-    if (squares[coordinate].classList.length != 0 && squares[coordinate].classList.item(0) != "hover-effect") return false;
+    if (squares[coordinate].classList.length != 0 && !squares[coordinate].classList.contains("hover-effect") && !squares[coordinate].classList.contains("original-section")) return false;
     let surrounding = findAdjacentPositions(coordinate);
 
     function checkIfOccupied(otherPosition) {
-        if(otherPosition != null && squares[otherPosition].classList.length != 0 && squares[otherPosition].classList.item(0) != "hover-effect") return true;
+        if(otherPosition != null && squares[otherPosition].classList.length != 0 && !squares[otherPosition].classList.contains("hover-effect") && !squares[otherPosition].classList.contains("original-section")) return true;
         return false;
     }
 
@@ -328,8 +328,8 @@ const initialSetup = (() => {
         
                 s.onmouseenter = e => {
                     specialClassShips.forEach(sc => {
-                        if(sc.classList.contains("revealed-ship-middle")) sc.style.backgroundColor = "rgb(55, 55, 55)";
-                        else sc.getElementsByTagName("i")[0].style.color = "rgb(55, 55, 55)";
+                        if(sc.classList.contains("revealed-ship-middle")) sc.style.backgroundColor = "var(--light-ship-color)";
+                        else sc.getElementsByTagName("i")[0].style.color = "var(--light-ship-color)";
                     });
                 }
 
