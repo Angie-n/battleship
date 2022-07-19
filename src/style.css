@@ -129,8 +129,8 @@ button[type="submit"] {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 50px;
-    width: 50px;
+    height: 60px;
+    width: 60px;
     font-size: clamp(1.8em, 2vw, 4em);
 }
 
@@ -148,6 +148,8 @@ button[type="submit"] {
 
 .hover-effect {
     position: absolute;
+    top: 0;
+    left: 0;
     opacity: 0.4;
     width: 100%;
     height: 100%;
@@ -301,7 +303,7 @@ button[type="submit"] {
 }
 
 .revealed-ship-top i, .revealed-ship-bottom i, .revealed-ship-middle i, .revealed-ship-right i, .revealed-ship-left i, .revealed-single-ship i{
-    position: relative;
+    position: absolute;
     color: var(--ship-color);
     font-size: clamp(32px, 4vw, 65px);
     height: 100%;
