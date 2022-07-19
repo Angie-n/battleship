@@ -192,7 +192,6 @@ const initialSetup = (() => {
     let enemyBoard;
 
     const drag = (() => {
-        let initialDragBox = document.getElementById("ship-pieces"); //allow for drags back in box
         let draggables = document.getElementsByClassName("draggable");
         let dragDropOffs = document.querySelectorAll("#setup-board > div");
 
@@ -307,6 +306,8 @@ const initialSetup = (() => {
                 hoveredOverDivs.forEach((h,offset) => coordinates.push(i + offset));
                 playerCoordinates.push(coordinates);
                 hoveredOverDivs = [];
+
+                document.getElementById("ship-pieces").style.backgroundColor = "var(--green-screen)";
             }
         }
 
@@ -384,7 +385,7 @@ const initialSetup = (() => {
                                     newLocation.classList.add(oldLocation.classList.item(cl));
                                 }
                                 newLocation.innerHTML = oldLocation.innerHTML;
-                                
+
                                 let replacement = document.createElement("div");
                                 document.querySelectorAll("#setup-board > div")[originalCoordinates[i]].replaceWith(replacement);
                                 addDropOffEvent(replacement, originalCoordinates[i]);
@@ -426,12 +427,8 @@ const initialSetup = (() => {
             });
         }
 
-        [...draggables].forEach((d,i) => {
+        function addBoxDragEvents(d) {
             let shipSection = d.getElementsByTagName("div");
-            [...shipSection].forEach(s => {
-                s.classList.add("draggable-ship-" + i)
-                s.classList.add("draggable-section");
-            });
             d.ondragstart = e => {
                 d.classList.add("grabbed");
                 e.dataTransfer.setData("ship", d.innerHTML);
@@ -471,7 +468,71 @@ const initialSetup = (() => {
                     }
                 }
             }
+        }
+
+        [...draggables].forEach((d,i) => {
+            let shipSection = d.getElementsByTagName("div");
+            [...shipSection].forEach(s => {
+                s.classList.add("draggable-ship-" + i)
+                s.classList.add("draggable-section");
+            });
+            addBoxDragEvents(d);
         });
+
+        let backToInitialBox = (() => {
+            let initialDragBox = document.getElementById("ship-pieces"); 
+            let count = 0;
+            
+            initialDragBox.ondragenter = e => {
+                e.preventDefault();
+                count++;
+                initialDragBox.style.backgroundColor = "rgb(60, 189, 145)";
+            }
+    
+            initialDragBox.ondragleave = e => {
+                e.preventDefault();
+                count--;
+                if(count === 0) document.getElementById("ship-pieces").style.backgroundColor = "var(--green-screen)";
+            }
+    
+            initialDragBox.ondragover = e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+            }
+    
+            initialDragBox.ondrop = e => {
+                e.preventDefault();
+                let originalSections = [...document.getElementsByClassName("original-section")];
+    
+                if(originalSections.length !== 0) {
+                    let shipInfo = e.dataTransfer.getData("ship");
+                    let div = document.createElement("div");
+                    div.innerHTML = shipInfo;
+                    let isHorizontal = [...div.getElementsByTagName("div")][0].classList.contains("revealed-ship-left");
+                    div.setAttribute("draggable", true);
+                    div.classList.add("drag-ship");
+                    div.classList.add("draggable");
+                    if(!isHorizontal) {
+                        div.style.flexDirection = "column";
+                        console.log("s");
+                    }
+                    [...div.getElementsByTagName("div")].forEach(d => d.setAttribute("draggable", false));
+                    initialDragBox.append(div);
+                    addBoxDragEvents(div);
+    
+                    originalSections.forEach(o => {
+                        let replacement = document.createElement("div");
+                        let index = Array.prototype.indexOf.call(document.querySelectorAll("#setup-board > div"), o);
+                        o.replaceWith(replacement);
+                        addDropOffEvent(replacement, index);
+                    });
+                }
+                
+                originalSections.forEach(o => o.classList.remove("original-section"));
+                initialDragBox.style.backgroundColor = "var(--green-screen)";
+            }
+    
+        })();
     })();
 
     function convert1Dto2DCoordinates(coordinates1D) {
