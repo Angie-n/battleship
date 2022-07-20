@@ -108,8 +108,7 @@ const getPositionsShipCanFitFromStartingIndex = (shipSize, coordinate) => {
     return allowedIndexes;
 }
 
-const randomizeShipPlacement = () => {
-    let coordinates = [];
+function findSpecialClasses() {
     let specialClasses = [];
     [...document.getElementsByClassName("draggable-section")].forEach(ds => {
         let specialClass;
@@ -120,6 +119,12 @@ const randomizeShipPlacement = () => {
         }
         if(!specialClasses.includes(specialClass)) specialClasses.push(specialClass);
     });
+    return specialClasses;
+}
+
+const randomizeShipPlacement = () => {
+    let coordinates = [];
+    let specialClasses = findSpecialClasses();
 
     specialClasses.forEach(s => {
         let allGridSpaces = document.querySelectorAll("#setup-board > div");
@@ -303,11 +308,7 @@ const initialSetup = (() => {
                 originalSections.forEach(o => o.classList.remove("original-section"));
             }
             
-            let coordinates = [];
-            hoveredOverDivs.forEach((h,offset) => coordinates.push(i + offset));
-            playerCoordinates.push(coordinates);
             hoveredOverDivs = [];
-
             document.getElementById("ship-pieces").style.backgroundColor = "var(--green-screen)";
         }
     }
@@ -423,6 +424,7 @@ const initialSetup = (() => {
             s.ondragend = e => {
                 removeDragStyles([...document.querySelectorAll("#setup-board > div")]);
                 document.getElementsByClassName("drag-image")[0].remove();
+                specialClassShips.forEach(c => c.classList.remove("original-section"));
                 sectionDragEvents();
             }
         });
@@ -513,10 +515,7 @@ const initialSetup = (() => {
                 div.setAttribute("draggable", true);
                 div.classList.add("drag-ship");
                 div.classList.add("draggable");
-                if(!isHorizontal) {
-                    div.style.flexDirection = "column";
-                    console.log("s");
-                }
+                if(!isHorizontal) div.style.flexDirection = "column";
                 [...div.getElementsByTagName("div")].forEach(d => d.setAttribute("draggable", false));
                 initialDragBox.append(div);
                 addBoxDragEvents(div);
@@ -548,27 +547,57 @@ const initialSetup = (() => {
 
     //updates player coordinates
     document.getElementById("randomizer-btn").onclick = () => {
-        playerCoordinates = randomizeShipPlacement().coordinates;
+        randomizeShipPlacement();
         sectionDragEvents();
         [...document.querySelectorAll("#setup-board > div")].forEach((d,i) => {
             addDropOffEvent(d, i);
         });
     }
 
-    const clearBoard = board => {
+    function clearBoard(board) {
         let divs = board.querySelectorAll("#" + board.id +  " > div");
         for(let i = 0; i < divs.length; i++) {
-            let cleanDiv = document.createElement("div");
-            divs[i].replaceWith(cleanDiv);
+            while(divs[i].classList.length < 0) divs[i].classList.remove(divs[i].classList.item(0));
+            divs[i].innerHTML = "";
+            divs[i].setAttribute("draggable", false);
         }
+    }
+
+    function copyBoard (boardToCopy, board) {
+        let copiedDivs = document.querySelectorAll("#" + boardToCopy.id +  " > div");
+        for(let i = 0; i < copiedDivs.length; i++) {
+            let div = document.createElement("div");
+            board.append(div);
+            div.innerHTML = copiedDivs[i].innerHTML;
+            for(let c = 0; c < copiedDivs[i].classList.length; c++) {
+                let regex = /revealed-*/;
+                if(regex.test(copiedDivs[i].classList.item(c))) div.classList.add(copiedDivs[i].classList.item(c));
+            }
+        }
+    }
+
+    function findShipCoordinates() {
+        let shipCoordinates = [];
+        let specialClasses = findSpecialClasses();
+        specialClasses.forEach(sc => {
+            let currentSpecial = [...document.getElementsByClassName(sc)];
+            let sectionCoordinates = [];
+            currentSpecial.forEach(cs => {
+                let index = Array.prototype.indexOf.call(document.querySelectorAll("#setup-board > div"), cs);
+                sectionCoordinates.push(index);
+            });
+            shipCoordinates.push(sectionCoordinates);
+        });
+        return shipCoordinates;
     }
 
     //creates board for player and its DOM representation
     function useSetupToSetUpPlayerBoard() {
+        playerCoordinates = findShipCoordinates();
         playerCoordinates = convert1Dto2DCoordinates(playerCoordinates);
         playerBoard = Gameboard(playerCoordinates);
         let playerBoardDOM = document.getElementById("player-board");
-        clearBoard(setupBoard);
+        copyBoard(setupBoard, playerBoardDOM);
     }
 
     //creates board for enemy and its DOM representation
@@ -577,8 +606,7 @@ const initialSetup = (() => {
         let coordinates1D = randomizeShipPlacement(setupBoard).coordinates;
         enemyCoordinates = convert1Dto2DCoordinates(coordinates1D);
         enemyBoard = Gameboard(enemyCoordinates);
-        enemyBoardDOM.innerHTML = setupBoard.innerHTML;
-        clearBoard(setupBoard);
+        copyBoard(setupBoard, enemyBoardDOM);
     }
 
     document.getElementById("start-game-btn").onclick = () => {
