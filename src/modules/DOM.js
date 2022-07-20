@@ -169,14 +169,6 @@ const randomizeShipPlacement = () => {
     return {coordinates};
 }
 
-const clearBoard = board => {
-    let divs = board.querySelectorAll("#" + board.id +  " > div");
-    for(let i = 0; i < divs.length; i++) {
-        let cleanDiv = document.createElement("div");
-        divs[i].replaceWith(cleanDiv);
-    }
-}
-
 
 const initialSetup = (() => {
     const form = document.getElementById("setup-form");
@@ -223,7 +215,6 @@ const initialSetup = (() => {
         }
 
         d.ondragenter = e => {
-            console.log("dragged over: " + d);
             e.preventDefault();
             if(lastHoveredOverDivs != undefined) removeDragStyles(lastHoveredOverDivs);
             hoveredOverDivs = [];
@@ -288,8 +279,11 @@ const initialSetup = (() => {
                 shipDiv.innerHTML = ship;
                 let shipSections = shipDiv.getElementsByTagName("div");
                 hoveredOverDivs.forEach(h => {
-                    shipSections[0].setAttribute("draggable", true);
-                    h.replaceWith(shipSections[0]);
+                    let section = shipSections[0];
+                    let index = Array.prototype.indexOf.call(document.querySelectorAll("#setup-board > div"), h);
+                    section.setAttribute("draggable", true);
+                    h.replaceWith(section);
+                    addDropOffEvent(section, index);
                 });
 
                 console.log("original: ");
@@ -561,12 +555,19 @@ const initialSetup = (() => {
         });
     }
 
+    const clearBoard = board => {
+        let divs = board.querySelectorAll("#" + board.id +  " > div");
+        for(let i = 0; i < divs.length; i++) {
+            let cleanDiv = document.createElement("div");
+            divs[i].replaceWith(cleanDiv);
+        }
+    }
+
     //creates board for player and its DOM representation
     function useSetupToSetUpPlayerBoard() {
         playerCoordinates = convert1Dto2DCoordinates(playerCoordinates);
         playerBoard = Gameboard(playerCoordinates);
         let playerBoardDOM = document.getElementById("player-board");
-        playerBoardDOM.innerHTML = setupBoard.innerHTML;
         clearBoard(setupBoard);
     }
 
