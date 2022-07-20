@@ -303,6 +303,10 @@ const initialSetup = (() => {
                         o.classList.remove("original-section");
                     });
                 }
+
+                if(document.getElementById("ship-pieces").getElementsByTagName("div").length === 0) {
+                    document.getElementById("start-game-btn").style.color = "white";
+                }
             }
             else if (originalSections.length !== 0) {
                 originalSections.forEach(o => o.classList.remove("original-section"));
@@ -530,6 +534,7 @@ const initialSetup = (() => {
             
             originalSections.forEach(o => o.classList.remove("original-section"));
             initialDragBox.style.backgroundColor = "var(--green-screen)";
+            document.getElementById("start-game-btn").style.color = "gray";
         }
 
     })();
@@ -552,6 +557,7 @@ const initialSetup = (() => {
         [...document.querySelectorAll("#setup-board > div")].forEach((d,i) => {
             addDropOffEvent(d, i);
         });
+        document.getElementById("start-game-btn").style.color = "white";
     }
 
     function clearBoard(board) {
