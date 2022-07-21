@@ -51,21 +51,4 @@ describe("Bot tests", () => {
         expect(gameboard.legalMoves.includes(next)).toBe(true);
         expect(gameboard.checkIfAllSunk()).toBe(false);
     });
-
-    test("Place ships at every square on grid, then attack all squares on grid", () => {
-        let throwawayGameboard = Gameboard([]);
-        let allLocations = throwawayGameboard.legalMoves;
-        allLocations = allLocations.map(l => JSON.parse(l));
-        gameboard = Gameboard([allLocations]);
-        bot = Bot(gameboard, isTurn);
-        for(let i = 0; i < allLocations.length; i++) {
-            let next = bot.decideAttackLocation();
-            let match = next.match(/[0-9]+/g);
-            let x = match[0];
-            let y = match[1];
-            bot.attack(x, y);
-        }
-        expect(gameboard.checkIfAllSunk()).toBe(true);
-    });
-
 });
