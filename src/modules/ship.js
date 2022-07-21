@@ -7,7 +7,7 @@ const Ship = positionsOccupied => {
         locationsHit.push([x, y]);
         if(locationsHit.length === positionsOccupied.length) ship.hasSunk = true;
     };
-    const ship = {hasSunk, hit};
+    const ship = {hasSunk, locationsHit, hit};
     return ship;
 }
 
