@@ -81,7 +81,6 @@ const Bot = (enemyGameboard, isTurn) => {
             let index = indexOf2DArray(player.possibleMoves, [x, y]);
             if(index != -1) player.possibleMoves.splice(indexOf2DArray(player.possibleMoves, [x, y]), 1);
         });
-        console.log(player.possibleMoves);
     }
 
     player.attack = (x, y) => {
@@ -93,7 +92,6 @@ const Bot = (enemyGameboard, isTurn) => {
             if(player.checkSuccessOfLastMove() === "Hit") player.locationsOfInterest.push([x, y]);
             else if(Array.isArray(player.checkSuccessOfLastMove())) player.locationsOfInterest = [];
             eliminatePossibleMoves();
-            console.log(player.locationsOfInterest);
         }
         else console.log("Unable to carry out the last attack order");
     }
