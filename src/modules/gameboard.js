@@ -1,10 +1,10 @@
 import { Ship } from "./ship";
+import { indexOf2DArray } from "./helper";
 
 //shipLocations in format [[[x1,y1],[x2,y2],...], [x1, y1], ...]]]
 const Gameboard = shipLocations => {
     let ships = [];
     let grid;
-    //Array contents in string format for legalMoves.
     let legalMoves = [];
     let lastAttackLocation;
 
@@ -20,10 +20,9 @@ const Gameboard = shipLocations => {
             grid[r] = new Array(10);
             for(let c = 0; c < grid[r].length; c++) {
                 grid[r][c] = Location();
-                legalMoves.push("[" + r + "," + c + "]");
+                legalMoves.push([r, c]);
             }
         }
-        console.log(grid);
     })();
 
     const placeShips = (() => {
@@ -40,7 +39,7 @@ const Gameboard = shipLocations => {
     const receiveAttack = (x, y) => {
         if(grid[x][y].containedShip != null) grid[x][y].containedShip.hit(x, y);
         grid[x][y].isHit = true;
-        gameboard.legalMoves.splice(gameboard.legalMoves.indexOf("[" + x + "," + y + "]"), 1);
+        gameboard.legalMoves.splice(indexOf2DArray(gameboard.legalMoves, [x,y]), 1);
         lastAttackLocation = [x, y];
     }
 
