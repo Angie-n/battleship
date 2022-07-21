@@ -11,7 +11,6 @@ const Game = (player, bot) => {
 
     const botMove = () => {
         let position = bot.decideAttackLocation();
-        console.log("Game, bot turn: " + bot.getIsTurn());
         bot.attack(position[0], position[1]);
         if(!bot.getIsTurn()) player.setIsTurn(true);
         game.lastBotMove = [position[0], position[1]];
