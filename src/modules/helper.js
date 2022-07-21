@@ -68,4 +68,18 @@ function convert2Dto1DCoordinates(coordinates2D) {
     return coordinates;
 }
 
-export {findAdjacentPositions, convert1Dto2DCoordinates, convert2Dto1DCoordinates};
+//Assumes coordinates only differ one way for the x-direction or y-direction.
+function sort2DCoordinates(coordinates) {
+    if(coordinates.length < 2) return coordinates;
+    if(coordinates[0][0] != coordinates[1][0]) return coordinates.sort((a,b) => a[0] - b[0]);
+    return coordinates.sort((a,b) => a[1] - b[1]);
+}
+
+function indexOf2DArray(arr, element) {
+    for(let i = 0; i < arr.length; i++) {
+        if(element[0] === arr[i][0] && element[1] === arr[i][1]) return i;
+    }
+    return -1;
+}
+
+export {findAdjacentPositions, convert1Dto2DCoordinates, convert2Dto1DCoordinates, sort2DCoordinates, indexOf2DArray};

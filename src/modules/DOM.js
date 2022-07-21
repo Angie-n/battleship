@@ -565,13 +565,6 @@ const initialSetup = (() => {
 
 const gameSetUp = (() => {    
     for(let i = 0; i < document.querySelectorAll("#setup-board > div").length; i++) document.getElementById("bot-board").append(document.createElement("div"));
-
-    //Assumes coordinates only differ one way for the x-direction or y-direction.
-    function sort2DCoordinates(coordinates) {
-        if(coordinates.length < 2) return coordinates;
-        if(coordinates[0][0] != coordinates[1][0]) return coordinates.sort((a,b) => a[0] - b[0]);
-        return coordinates.sort((a,b) => a[1] - b[1]);
-    }
     
     const applyStylesForAttackLocation = (locationAttacked, success, boardID) => {
         let attackedIndex1D = locationAttacked[0] + locationAttacked[1] * 10;
@@ -591,7 +584,6 @@ const gameSetUp = (() => {
             divs[attackedIndex1D].classList.add("hit-ship");
         }
         else {
-            sort2DCoordinates(success);
             let isHorizontal = false;
             if(success.length > 1) isHorizontal = success[0][0] + 1 === success[1][0];
             success.forEach((s,i) => {
