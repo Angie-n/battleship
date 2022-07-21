@@ -1,5 +1,6 @@
 import { Gameboard } from "./gameboard";
 import { Player, Bot } from "./player";
+import { Game } from "./game";
 
 const findAdjacentPositions = index1D => {
     const findLeft = () => {
@@ -51,8 +52,6 @@ const findAdjacentPositions = index1D => {
 //expect coordinate to be 1D.
 const checkIfCoordinateAllowsShip = coordinate => {
     let squares = document.querySelectorAll("#setup-board > div");
-    console.log("Coordinate: " + coordinate);
-    console.log(squares[coordinate]);
     if (squares[coordinate].classList.length != 0 && !squares[coordinate].classList.contains("hover-effect") && !squares[coordinate].classList.contains("original-section")) return false;
     let surrounding = findAdjacentPositions(coordinate);
 
@@ -174,6 +173,38 @@ const randomizeShipPlacement = () => {
     return {coordinates};
 }
 
+function convert1Dto2DCoordinates(coordinates1D) {
+    let coordinates = [];
+    for(let oi = 0; oi < coordinates1D.length; oi++) {
+        coordinates.push([]);
+        for(let ii = 0; ii < coordinates1D[oi].length; ii++) {
+            coordinates[oi].push([coordinates1D[oi][ii] % 10, Math.floor(coordinates1D[oi][ii] / 10)]);
+        }
+    }
+    return coordinates;
+}
+
+function convert2Dto1DCoordinates(coordinates2D) {
+    let coordinates = [];
+    for(let ship = 0; ship < coordinates2D.length; ship++) {
+        coordinates.push([]);
+        for(let section = 0; section < coordinates2D[ship].length; section++) {
+            let coordinate1D = coordinates2D[ship][section][0] + coordinates2D[ship][section][1] * 10;
+            coordinates[ship].push(coordinate1D);
+        }
+    }
+    return coordinates;
+}
+
+function createDivForHover(isValid) {
+    let hoverDiv = document.createElement("div");
+    hoverDiv.classList.add("hover-effect");
+    if(isValid) hoverDiv.style.backgroundColor = "white";
+    else hoverDiv.style.backgroundColor = "red";
+    return hoverDiv;
+}
+
+let game;
 
 const initialSetup = (() => {
     const form = document.getElementById("setup-form");
@@ -211,14 +242,6 @@ const initialSetup = (() => {
         let validPosition;
         let hoveredOverDivs = [];
 
-        function createDivForHover(isValid) {
-            let hoverDiv = document.createElement("div");
-            hoverDiv.classList.add("hover-effect");
-            if(isValid) hoverDiv.style.backgroundColor = "white";
-            else hoverDiv.style.backgroundColor = "red";
-            return hoverDiv;
-        }
-
         d.ondragenter = e => {
             e.preventDefault();
             if(lastHoveredOverDivs != undefined) removeDragStyles(lastHoveredOverDivs);
@@ -229,7 +252,6 @@ const initialSetup = (() => {
             let isHorizontal = grabbedItem.getElementsByTagName("div")[0].classList.contains("revealed-ship-left");
 
             if(isHorizontal && (!checkIfCoordinateAllowsShip(i) || findHorizontalCoordinatesIfFit(size, i) == null)) {
-                console.log("No horizontal spots");
                 let offset = 0;
                 while((i + offset) < 100 && offset < size && Math.floor(i / 10) === Math.floor((i + offset) / 10)) {
                     let div = document.querySelectorAll("#setup-board > div")[i + offset];
@@ -240,7 +262,6 @@ const initialSetup = (() => {
                 validPosition = false;
             }
             else if(!isHorizontal && (!checkIfCoordinateAllowsShip(i) || findVerticalCoordinatesIfFit(size, i) == null)) {
-                console.log("No vertical spots");
                 let offset = 0;
                 while((i + offset) < 100 && offset < size * 10 && i % 10 === (i + offset) % 10){
                     let div = document.querySelectorAll("#setup-board > div")[i + offset];
@@ -266,7 +287,6 @@ const initialSetup = (() => {
                 validPosition = true;
             }
             lastHoveredOverDivs = hoveredOverDivs;
-            console.log(hoveredOverDivs);
         }
 
         d.ondragover = e => {
@@ -291,8 +311,6 @@ const initialSetup = (() => {
                     addDropOffEvent(section, index);
                 });
 
-                console.log("original: ");
-                console.log(originalSections);
                 if(originalSections.length === 0) document.getElementsByClassName("grabbed")[0].remove();
                 else {
                     originalSections.forEach(o => {
@@ -366,9 +384,6 @@ const initialSetup = (() => {
                 }
 
                 specialClassShips.forEach(s => s.classList.remove("original-section"));
-
-                console.log("New: " + newCoordinates);
-                console.log("Old: " + originalCoordinates);
 
                 if(newCoordinates != null)  {
                     if(isHorizontal) {
@@ -539,17 +554,6 @@ const initialSetup = (() => {
 
     })();
 
-    function convert1Dto2DCoordinates(coordinates1D) {
-        let coordinates = [];
-        for(let oi = 0; oi < coordinates1D.length; oi++) {
-            coordinates.push([]);
-            for(let ii = 0; ii < coordinates1D[oi].length; ii++) {
-                coordinates[oi].push([coordinates1D[oi][ii] % 10, Math.floor(coordinates1D[oi][ii] / 10)]);
-            }
-        }
-        return coordinates;
-    }
-
     //updates player coordinates
     document.getElementById("randomizer-btn").onclick = () => {
         randomizeShipPlacement();
@@ -578,6 +582,8 @@ const initialSetup = (() => {
             for(let c = 0; c < copiedDivs[i].classList.length; c++) {
                 let regex = /revealed-*/;
                 if(regex.test(copiedDivs[i].classList.item(c))) div.classList.add(copiedDivs[i].classList.item(c));
+                if(div.getElementsByTagName("i").length != 0) div.getElementsByTagName("i")[0].style.opacity = "0.5";
+                else div.style.backgroundColor = "rgba(31, 36, 31, 0.5)";
             }
         }
     }
@@ -608,11 +614,9 @@ const initialSetup = (() => {
 
     //creates board for enemy and its DOM representation
     function randomlySetupEnemyBoard() {
-        let enemyBoardDOM = document.getElementById("bot-board");
         let coordinates1D = randomizeShipPlacement(setupBoard).coordinates;
         enemyCoordinates = convert1Dto2DCoordinates(coordinates1D);
         enemyBoard = Gameboard(enemyCoordinates);
-        copyBoard(setupBoard, enemyBoardDOM);
     }
 
     document.getElementById("start-game-btn").onclick = () => {
@@ -621,39 +625,104 @@ const initialSetup = (() => {
             document.getElementById("game-container").style.display = "block";
             useSetupToSetUpPlayerBoard();
             randomlySetupEnemyBoard();
+            let player = Player(document.getElementById("name").value, enemyBoard, true);
+            let enemy = Bot(playerBoard, false);
+            game = Game(player, enemy);
         }
     }
 })();
 
-const setUpRound = () => {    
-    const setPlayerTurnView = player => {
-        let gridSquare = document.getElementById("bot-board").getElementsByTagName("div");
-        [...gridSquare].forEach(square, index => {
-            let x = Math.floor(index / 10);
-            let y = index % 10;
-            if(player.checkIfAbleToAttackLocation(x,y)) {
-                square.onclick = () => {
-                    player.attack(x,y);
-                };
-                square.onmouseover = () => {square.style.backgroundColor = "rgb(7, 155, 219)"};
-            }
-        });
+const gameSetUp = (() => {    
+    for(let i = 0; i < document.querySelectorAll("#setup-board > div").length; i++) document.getElementById("bot-board").append(document.createElement("div"));
+
+    //Assumes coordinates only differ one way for the x-direction or y-direction.
+    function sort2DCoordinates(coordinates) {
+        if(coordinates.length < 2) return coordinates;
+        if(coordinates[0][0] != coordinates[1][0]) return coordinates.sort((a,b) => a[0] - b[0]);
+        return coordinates.sort((a,b) => a[1] - b[1]);
     }
     
-    const applyStylesForAttackLocation = (ship, div) => {
-        let icon = document.createElement("i");
-        icon.classList.add("fa-solid");
-        if(ship == null) {
+    const applyStylesForAttackLocation = (locationAttacked, success, boardID) => {
+        let attackedIndex1D = locationAttacked[0] + locationAttacked[1] * 10;
+        let divs = document.querySelectorAll("#" + boardID + " > div");
+        if(success === "Missed") {
+            let icon = document.createElement("i");
+            icon.classList.add("fa-solid");
             icon.classList.add("fa-circle");
-            div.append(icon);
-            div.classList.add("missed-shot");
+            divs[attackedIndex1D].append(icon);
+            divs[attackedIndex1D].classList.add("missed-shot");
         }
-        else if(ship == null) {
+        else if(success === "Hit") {
+            let icon = document.createElement("i");
+            icon.classList.add("fa-solid");
             icon.classList.add("fa-explosion");
-            div.append(icon);
-            div.classList.add("hit-ship");
+            divs[attackedIndex1D].append(icon);
+            divs[attackedIndex1D].classList.add("hit-ship");
         }
+        else {
+            sort2DCoordinates(success);
+            let isHorizontal = false;
+            if(success.length > 1) isHorizontal = success[0][0] + 1 === success[1][0];
+            success.forEach((s,i) => {
+                let index1D = s[0] + s[1] * 10;
+                divs[index1D].classList.remove("hit-ship");
+                let iconToRemove = divs[index1D].getElementsByClassName("fa-explosion");
+                if(iconToRemove.length != 0) iconToRemove[0].remove();
+
+                if(boardID === "bot-board") {
+                    let icon = document.createElement("i");
+                    icon.classList.add("fa-solid");
+                    if(i === 0) {
+                        if(success.length === 1) divs[index1D].classList.add("revealed-single-ship");
+                        else if(isHorizontal) divs[index1D].classList.add("revealed-ship-left");
+                        else divs[index1D].classList.add("revealed-ship-top");
+                    }
+                    else if(i === success.length - 1) {
+                        if(isHorizontal) divs[index1D].classList.add("revealed-ship-right");
+                        else divs[index1D].classList.add("revealed-ship-bottom");
+                    }
+                    else {
+                        divs[index1D].classList.add("revealed-ship-middle");
+                    }
     
+                    if(divs[index1D].classList.contains("revealed-single-ship")) {
+                        icon.classList.add("fa-diamond");
+                        divs[index1D].append(icon);
+                    }
+                    else if(!divs[index1D].classList.contains("revealed-ship-middle")) {
+                        icon.classList.add("fa-play");
+                        divs[index1D].append(icon);
+                    }
+                }
+                else {
+                    if(divs[index1D].classList.contains("revealed-ship-middle")) divs[index1D].style.backgroundColor = "var(--ship-color)";
+                    else divs[index1D].getElementsByTagName("i")[0].style.opacity = "1";
+                }
+        
+            });
+        }
     }
-    return {setPlayerTurnView};
-}
+
+    const setPlayerTurnView = (() => {
+        let gridSquare = document.querySelectorAll("#bot-board > div");
+        [...gridSquare].forEach((square, index) => {
+            let x = index % 10;
+            let y = Math.floor(index / 10);
+            square.onclick = () => {
+                if(game.checkIfPlayerCanAttackLocation(x, y)) {
+                    let successStatus = game.playerMove(x,y);
+                    applyStylesForAttackLocation([x, y], successStatus, "bot-board");
+                    while(!game.checkIfPlayerTurn()) {
+                        let botSuccessStatus = game.botMove();
+                        applyStylesForAttackLocation(game.lastBotMove, botSuccessStatus, "player-board");
+                    }
+                }
+            };
+            square.onmouseover = () => {
+                if (game.checkIfPlayerCanAttackLocation(x, y)) square.append(createDivForHover(true));
+                else square.append(createDivForHover(false));
+            };
+            square.onmouseleave = () => {document.getElementsByClassName("hover-effect")[0].remove()};
+        });
+    })();
+})();
