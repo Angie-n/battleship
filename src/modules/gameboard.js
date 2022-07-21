@@ -6,6 +6,7 @@ const Gameboard = shipLocations => {
     let grid;
     //Array contents in string format for legalMoves.
     let legalMoves = [];
+    let lastAttackLocation;
 
     const Location = () => {
         let containedShip = null;
@@ -22,6 +23,7 @@ const Gameboard = shipLocations => {
                 legalMoves.push("[" + r + "," + c + "]");
             }
         }
+        console.log(grid);
     })();
 
     const placeShips = (() => {
@@ -39,6 +41,7 @@ const Gameboard = shipLocations => {
         if(grid[x][y].containedShip != null) grid[x][y].containedShip.hit(x, y);
         grid[x][y].isHit = true;
         gameboard.legalMoves.splice(gameboard.legalMoves.indexOf("[" + x + "," + y + "]"), 1);
+        lastAttackLocation = [x, y];
     }
 
     const checkIfAllSunk = () => {
@@ -57,7 +60,15 @@ const Gameboard = shipLocations => {
         return false;
     }
 
-    const gameboard = {legalMoves, receiveAttack, checkIfAllSunk, checkIfLocationHitAndMissed, checkIfLocationHitWithShip};
+    const getShipSunkByLastAttack = () => {
+        if(lastAttackLocation == null) return null;
+        let x = lastAttackLocation[0];
+        let y = lastAttackLocation[1];
+        if(grid[x][y].containedShip == null || !grid[x][y].containedShip.hasSunk) return null;
+        return grid[x][y].containedShip.locationsHit;
+    }
+
+    const gameboard = {legalMoves, receiveAttack, checkIfAllSunk, checkIfLocationHitAndMissed, checkIfLocationHitWithShip, getShipSunkByLastAttack};
     return gameboard;
 }
 
