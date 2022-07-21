@@ -225,6 +225,9 @@ button[type="submit"] {
 .gameboard div > * {
     pointer-events: none;
 }
+.gameboard div i {
+    position: absolute;
+}
 
 #commentary-box {
     display: flex;
@@ -298,12 +301,16 @@ button[type="submit"] {
     width: 25%;
 }
 
-.hit-ship {
-    color: rgb(242, 145, 41);
+div .missed-shot {
+    font-size: 1em;
+    color: rgb(197, 194, 194);
 }
 
-.revealed-ship-top i, .revealed-ship-bottom i, .revealed-ship-middle i, .revealed-ship-right i, .revealed-ship-left i, .revealed-single-ship i{
-    position: absolute;
+.hit-ship {
+    color: orange;
+}
+
+.revealed-ship-top .fa-play, .revealed-ship-bottom .fa-play, .revealed-ship-middle .fa-play, .revealed-ship-right .fa-play, .revealed-ship-left .fa-play, .revealed-single-ship .fa-diamond{
     color: var(--ship-color);
     font-size: clamp(32px, 4vw, 65px);
     height: 100%;
@@ -312,27 +319,33 @@ button[type="submit"] {
     align-items: center;
 }
 
-.revealed-single-ship i {
-    font-size: clamp(23px, 3.5vw, 55px);
+.revealed-single-ship .fa-diamond {
+    font-size: clamp(25px, 3.5vw, 55px);
+    justify-content: center;
 }
 
 div .revealed-ship-middle {
     background-color: var(--ship-color);
-    width: clamp(32px, 4vw, 65px);
-    height: clamp(32px, 4vw, 65px);
     max-width: 100%;
     max-height: 100%;
+    width: clamp(32px, 4vw, 65px);
+    height: clamp(32px, 4vw, 65px);
 }
 
-.revealed-ship-top i{
+.gameboard .revealed-ship-middle {
+    height: auto;
+    width: auto;
+}
+
+.revealed-ship-top .fa-play{
     transform: rotate(-90deg);
 }
 
-.revealed-ship-bottom i {
+.revealed-ship-bottom .fa-play {
     transform: rotate(90deg);
 }
 
-.revealed-ship-left i {
+.revealed-ship-left .fa-play {
     transform: rotate(180deg);
 }
 
