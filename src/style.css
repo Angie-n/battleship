@@ -186,7 +186,7 @@ button[type="submit"] {
     border: 1px solid rgb(161, 160, 160);
 }
 
-#start-game-btn:hover {
+#start-game-btn:hover, #new-game-btn:hover {
     background-color: rgb(53, 52, 52);
 }
 
@@ -254,7 +254,7 @@ button[type="submit"] {
 #radio-screen {
     position: relative;
     width: 80%;
-    height: 100px;
+    height: 80px;
     background-color: var(--green-screen);
     font-family: orbitron, 'Courier New', Courier, monospace;
     margin-bottom: 10px;
@@ -287,8 +287,13 @@ button[type="submit"] {
     justify-content: center;
     text-align: center;
     font-size: 2em;
-    width: 90%;
-    height: 90px;
+    width: 80%;
+    min-height: 50px;
+}
+
+#win-lose-status {
+    font-size: 5em;
+    padding: 10px;
 }
 
 #new-game-btn {
