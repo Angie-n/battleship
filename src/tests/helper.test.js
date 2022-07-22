@@ -1,6 +1,5 @@
 import * as helperModule from "../modules/helper";
 
-
 describe("Adjacent positions", () => {
     test("find adjacent positions for the index 55", () => {
         let finder = helperModule.findAdjacentPositions(55);
@@ -61,4 +60,16 @@ describe("index of for 2D arrays", () => {
     test("Index of [2, 3] within [[2, 3], [4, 2], [6, 2], [9, 1]]", () => {
         expect(helperModule.indexOf2DArray([[2, 3], [4, 2], [6, 2], [9, 1]], [2, 3])).toBe(0);
     });
+});
+
+test("Check ['a', 'b', 'c'] equal to ['a', 'b', 'c']", () => {
+    expect(helperModule.arraysEqual(['a', 'b', 'c'], ['a', 'b', 'c'])).toBe(true);
+});
+
+test("Check ['a'] equal to ['a', 'b', 'c']", () => {
+    expect(helperModule.arraysEqual(['a'], ['a', 'b', 'c'])).toBe(false);
+});
+
+test("Check ['b'] equal to ['z']", () => {
+    expect(helperModule.arraysEqual(['b'], ["z"])).toBe(false);
 });

@@ -82,4 +82,12 @@ function indexOf2DArray(arr, element) {
     return -1;
 }
 
-export {findAdjacentPositions, convert1Dto2DCoordinates, convert2Dto1DCoordinates, sort2DCoordinates, indexOf2DArray};
+function arraysEqual(arr1, arr2) {
+    if(arr1 == null || arr2 == null || arr1.length !== arr2.length) return false;
+    for(let i = 0; i < arr1.length; i++) {
+        if(arr1[i] !== arr2[i]) return false;
+    }
+    return true;
+}
+
+export {findAdjacentPositions, convert1Dto2DCoordinates, convert2Dto1DCoordinates, sort2DCoordinates, indexOf2DArray, arraysEqual};
