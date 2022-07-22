@@ -25,11 +25,27 @@ const Game = (player, bot) => {
         return player.getIsTurn();
     }
 
-    const checkIfOver = () => {
-        return player.checkIfWon() && bot.checkIfWon();
+    const getGameStatus = () => {
+        if(player.checkIfWon()) {
+            player.setIsTurn(false);
+            return ["Won"];
+        }
+        else if(bot.checkIfWon()) {
+            bot.setIsTurn(false);
+            return ["Lost"];
+        }
+
+        let status = []
+        if(player.checkShipsSunk().length - bot.checkShipsSunk().length > 2) status.push("Ahead");
+        else if(player.checkShipsSunk().length - bot.checkShipsSunk().length < -2) status.push("Behind");
+        if(player.checkSuccessOfLastMove() === "Hit") status.push("Hit");
+        else if(player.checkSuccessOfLastMove() === "Missed") status.push("Missed");
+        else status.push("Sunk");
+
+        return status;
     }
 
-    let game = {lastBotMove, playerMove, botMove, checkIfPlayerCanAttackLocation, checkIfPlayerTurn, checkIfOver};
+    let game = {lastBotMove, playerMove, botMove, checkIfPlayerCanAttackLocation, checkIfPlayerTurn, getGameStatus};
     return game;
 }
 
