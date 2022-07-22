@@ -1,4 +1,4 @@
-import { findAdjacentPositions, convert1Dto2DCoordinates, convert2Dto1DCoordinates } from "./helper";
+import { findAdjacentPositions, convert1Dto2DCoordinates, arraysEqual } from "./helper";
 import { Gameboard } from "./gameboard";
 import { Player, Bot } from "./player";
 import { Game } from "./game";
@@ -495,17 +495,49 @@ const initialSetup = (() => {
         document.getElementById("start-game-btn").style.color = "white";
     }
 
+    //Assumes ships are all on grid.
+    function copyShipsToInitialBox() {
+        let specialClasses = findSpecialClasses();
+        specialClasses.forEach(sc => {
+            let div = document.createElement("div");
+            div.setAttribute("draggable", true);
+            div.classList.add("drag-ship");
+            div.classList.add("draggable");
+            div.style.flexDirection = "row";
+
+            let sections = [...document.getElementsByClassName(sc)];
+            sections.forEach(s => {
+                let clone = s.cloneNode(true);
+                clone.setAttribute("draggable", false);
+
+                if(clone.classList.contains("revealed-ship-top")) {
+                    clone.classList.remove("revealed-ship-top");
+                    clone.classList.add("revealed-ship-left");
+                }
+                else if (clone.classList.contains("revealed-ship-bottom")) {
+                    clone.classList.remove("revealed-ship-bottom");
+                    clone.classList.add("revealed-ship-right");
+                }
+                div.append(clone);
+            });
+            document.getElementById("ship-pieces").append(div);
+            addBoxDragEvents(div);
+        });
+    }
+
     function clearBoard(board) {
         let divs = board.querySelectorAll("#" + board.id +  " > div");
         for(let i = 0; i < divs.length; i++) {
-            while(divs[i].classList.length < 0) divs[i].classList.remove(divs[i].classList.item(0));
+            while(divs[i].classList.length > 0) divs[i].classList.remove(divs[i].classList.item(0));
             divs[i].innerHTML = "";
             divs[i].setAttribute("draggable", false);
         }
     }
 
+    //All contents of board will be cleared before contents of boardToCopy are copied.
     function copyBoard (boardToCopy, board) {
         let copiedDivs = document.querySelectorAll("#" + boardToCopy.id +  " > div");
+        board.innerHTML = "";
         for(let i = 0; i < copiedDivs.length; i++) {
             let div = document.createElement("div");
             board.append(div);
@@ -559,12 +591,25 @@ const initialSetup = (() => {
             let player = Player(document.getElementById("name").value, enemyBoard, true);
             let enemy = Bot(playerBoard, false);
             game = Game(player, enemy);
+            copyShipsToInitialBox();
+            clearBoard(setupBoard);
+            [...document.querySelectorAll("#setup-board > div")].forEach((d,i) => addDropOffEvent(d, i));
         }
+    }
+
+    document.getElementById("new-game-btn").onclick = () => {
+        clearBoard(document.getElementById("bot-board"));
+        document.getElementById("game-container").style.display = "none";
+        document.getElementById("game-setup-container").style.display = "block";
+        document.getElementById("win-lose-status").textContent = "";
+        document.getElementById("commentary-msg").textContent = "";
+        document.getElementById("start-game-btn").style.color = "white";
+        document.getElementById("new-game-btn").style.display = "none";
     }
 })();
 
-const gameSetUp = (() => {    
-    for(let i = 0; i < document.querySelectorAll("#setup-board > div").length; i++) document.getElementById("bot-board").append(document.createElement("div"));
+const gameSetUp = (() => {  
+    for(let i = 0; i < document.querySelectorAll("#setup-board > div").length; i++) document.getElementById("bot-board").append(document.createElement("div"));  
     
     const applyStylesForAttackLocation = (locationAttacked, success, boardID) => {
         let attackedIndex1D = locationAttacked[0] + locationAttacked[1] * 10;
@@ -626,7 +671,53 @@ const gameSetUp = (() => {
         }
     }
 
+    const getCommentary = statuses => {
+        let possibleCommentary = [];
+        let name = document.getElementById("name").value;
+        if(statuses.includes("Lost")) {
+            possibleCommentary.push("No need to worry, Captain " + name + ", I already evacuated from my assigned ship a long time ago!");
+            possibleCommentary.push("We'll get them next time.");
+            possibleCommentary.push("*glub glub*");
+            possibleCommentary.push("...Has anyone seen Ron?");
+        }
+        if(statuses.includes("Won")) {
+            possibleCommentary.push("All praise Captain " + name + "!");
+            possibleCommentary.push("Always knew we'd make it with you leading us!");
+            possibleCommentary.push("Time to celebrate!");
+            possibleCommentary.push("It was difficult, but we made it!");
+        }
+
+        if(statuses.includes("Missed")) {
+            possibleCommentary.push("Where next, Captain " + name + "?");
+        }
+
+        if(statuses.includes("Hit")) {
+            possibleCommentary.push("It's a hit!");
+        }
+
+        if(statuses.includes("Sunk")) {
+            possibleCommentary.push("Another one down!");
+        }
+
+        if(statuses.includes("Behind")) {
+            possibleCommentary.push("Whoops dozed off a bit there. Not exactly sure what I missed but you looked like you missed a lot.");
+            possibleCommentary.push("Permission to panic? Over.");
+            possibleCommentary.push("Almost got them! Oh wait, that's our ships.");
+            possibleCommentary.push("Is this a bad time to tell you I don't know how to swim?");
+        }
+        if (statuses.includes("Ahead")) {
+            possibleCommentary.push("They don't stand a chance.");
+            possibleCommentary.push("I'm starting to see what they mean by your tactical genius.");
+            possibleCommentary.push("We'll be done with this in no time!");
+            possibleCommentary.push("Glad I'm on your side!");
+        }
+
+        let commentary = possibleCommentary[Math.floor(Math.random() * possibleCommentary.length)];
+        return commentary;
+    };
+
     const setPlayerTurnView = (() => {
+        let statuses;
         let gridSquare = document.querySelectorAll("#bot-board > div");
         [...gridSquare].forEach((square, index) => {
             let x = index % 10;
@@ -635,9 +726,27 @@ const gameSetUp = (() => {
                 if(game.checkIfPlayerCanAttackLocation(x, y)) {
                     let successStatus = game.playerMove(x,y);
                     applyStylesForAttackLocation([x, y], successStatus, "bot-board");
-                    while(!game.checkIfPlayerTurn()) {
+                    let newStatus = game.getGameStatus();
+                    if(statuses == null || !arraysEqual(statuses, newStatus)) document.getElementById("commentary-msg").textContent = getCommentary(newStatus);
+                    statuses = newStatus;
+                    while(!game.checkIfPlayerTurn() && !statuses.includes("Won") && !statuses.includes("Lost")) {
                         let botSuccessStatus = game.botMove();
                         applyStylesForAttackLocation(game.lastBotMove, botSuccessStatus, "player-board");
+                        statuses = game.getGameStatus();
+                    }
+                    if(statuses.includes("Won") || statuses.includes("Lost")) {
+                        document.getElementById("commentary-msg").textContent = getCommentary(statuses);
+                        document.getElementById("new-game-btn").style.display = "block";
+                        if(statuses.includes("Won")) {
+                            document.getElementById("win-lose-status").textContent = document.getElementById("name").value.toUpperCase() + " WON";
+                            let wins = document.getElementById("win-stat");
+                            wins.textContent = parseInt(wins.textContent) + 1;
+                            if(wins.textContent.length === 1) wins.textContent = "0" + wins.textContent;
+                        }
+                        else document.getElementById("win-lose-status").textContent = "ENEMY WON";
+                       let rounds = document.getElementById("rounds-played");
+                       rounds.textContent = parseInt(rounds.textContent) + 1;
+                       if(rounds.textContent.length === 1) rounds.textContent = "0" + rounds.textContent;
                     }
                 }
             };
