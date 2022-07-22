@@ -43,8 +43,13 @@ const Gameboard = shipLocations => {
         lastAttackLocation = [x, y];
     }
 
-    const checkIfAllSunk = () => {
+    const getShipsSunk = () => {
         let sunkShips = ships.filter(ship => ship.hasSunk);
+        return sunkShips;
+    }
+
+    const checkIfAllSunk = () => {
+        let sunkShips = getShipsSunk();
         if(sunkShips.length === ships.length) return true;
         return false;
     }
@@ -67,7 +72,7 @@ const Gameboard = shipLocations => {
         return grid[x][y].containedShip.locationsHit;
     }
 
-    const gameboard = {legalMoves, receiveAttack, checkIfAllSunk, checkIfLocationHitAndMissed, checkIfLocationHitWithShip, getShipSunkByLastAttack};
+    const gameboard = {legalMoves, receiveAttack, getShipsSunk, checkIfAllSunk, checkIfLocationHitAndMissed, checkIfLocationHitWithShip, getShipSunkByLastAttack};
     return gameboard;
 }
 

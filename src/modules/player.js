@@ -36,9 +36,13 @@ const Player = (name, enemyGameboard, isTurn) => {
         return "Hit";
     }
 
+    const checkShipsSunk = () => {
+        return enemyGameboard.getShipsSunk();
+    }
+
     const checkIfWon = () => enemyGameboard.checkIfAllSunk();
 
-    let player = {name, isTurn, getIsTurn, setIsTurn, getLastAttackLocation, setLastAttackLocation, attack, checkIfAbleToAttackLocation, checkSuccessOfLastMove, checkIfWon};
+    let player = {name, isTurn, getIsTurn, setIsTurn, getLastAttackLocation, setLastAttackLocation, attack, checkIfAbleToAttackLocation, checkSuccessOfLastMove, checkShipsSunk, checkIfWon};
     return player
 }
 
