@@ -602,7 +602,7 @@ const initialSetup = (() => {
         document.getElementById("game-container").style.display = "none";
         document.getElementById("game-setup-container").style.display = "block";
         document.getElementById("win-lose-status").textContent = "";
-        document.getElementById("commentary-msg").textContent = "";
+        document.getElementById("commentary-msg").textContent = "What are your orders, Capt?";
         document.getElementById("start-game-btn").style.color = "white";
         document.getElementById("new-game-btn").style.display = "none";
     }
@@ -717,7 +717,7 @@ const gameSetUp = (() => {
     };
 
     const setPlayerTurnView = (() => {
-        let statuses;
+        let statuses = [];
         let gridSquare = document.querySelectorAll("#bot-board > div");
         [...gridSquare].forEach((square, index) => {
             let x = index % 10;
@@ -726,27 +726,47 @@ const gameSetUp = (() => {
                 if(game.checkIfPlayerCanAttackLocation(x, y)) {
                     let successStatus = game.playerMove(x,y);
                     applyStylesForAttackLocation([x, y], successStatus, "bot-board");
-                    let newStatus = game.getGameStatus();
-                    if(statuses == null || !arraysEqual(statuses, newStatus)) document.getElementById("commentary-msg").textContent = getCommentary(newStatus);
-                    statuses = newStatus;
-                    while(!game.checkIfPlayerTurn() && !statuses.includes("Won") && !statuses.includes("Lost")) {
-                        let botSuccessStatus = game.botMove();
-                        applyStylesForAttackLocation(game.lastBotMove, botSuccessStatus, "player-board");
-                        statuses = game.getGameStatus();
-                    }
-                    if(statuses.includes("Won") || statuses.includes("Lost")) {
-                        document.getElementById("commentary-msg").textContent = getCommentary(statuses);
-                        document.getElementById("new-game-btn").style.display = "block";
-                        if(statuses.includes("Won")) {
-                            document.getElementById("win-lose-status").textContent = document.getElementById("name").value.toUpperCase() + " WON";
-                            let wins = document.getElementById("win-stat");
-                            wins.textContent = parseInt(wins.textContent) + 1;
-                            if(wins.textContent.length === 1) wins.textContent = "0" + wins.textContent;
-                        }
-                        else document.getElementById("win-lose-status").textContent = "ENEMY WON";
-                       let rounds = document.getElementById("rounds-played");
-                       rounds.textContent = parseInt(rounds.textContent) + 1;
-                       if(rounds.textContent.length === 1) rounds.textContent = "0" + rounds.textContent;
+
+                    let newStatuses = game.getGameStatus();
+                    if(!arraysEqual(statuses, newStatuses))document.getElementById("commentary-msg").textContent = getCommentary(newStatuses);
+                    statuses = newStatuses;
+
+                    if(!game.checkIfPlayerTurn()) {
+                        let oldCommentary = document.getElementById("commentary-msg").textContent;
+                        let botInterval = setInterval(() => {
+                            if(game.checkIfPlayerTurn()) {
+                                clearInterval(botInterval);
+                                if(!arraysEqual(statuses, newStatuses)) {
+                                    document.getElementById("commentary-msg").textContent = getCommentary(newStatuses);
+                                    statuses = newStatuses;
+                                }
+                                else document.getElementById("commentary-msg").textContent = oldCommentary;
+                                if(document.getElementsByClassName("hover-effect").length > 0) document.getElementsByClassName("hover-effect")[0].style.backgroundColor = "white";
+                            }
+                            else if(!newStatuses.includes("Won") && !newStatuses.includes("Lost")) {
+                                let botSuccessStatus = game.botMove();
+                                applyStylesForAttackLocation(game.lastBotMove, botSuccessStatus, "player-board");
+                                newStatuses = game.getGameStatus();
+                                document.getElementById("commentary-msg").textContent = "Enemy is attacking...";
+                            }
+                            else if (newStatuses.includes("Won") || newStatuses.includes("Lost")) {
+                                clearInterval(botInterval);
+                                statuses = newStatuses;
+                                document.getElementById("commentary-msg").textContent = getCommentary(statuses);
+                                document.getElementById("new-game-btn").style.display = "block";
+                                if(statuses.includes("Won")) {
+                                    document.getElementById("win-lose-status").textContent = document.getElementById("name").value.toUpperCase() + " WON";
+                                    let wins = document.getElementById("win-stat");
+                                    wins.textContent = parseInt(wins.textContent) + 1;
+                                    if(wins.textContent.length === 1) wins.textContent = "0" + wins.textContent;
+                                }
+                            else document.getElementById("win-lose-status").textContent = "ENEMY WON";
+                            let rounds = document.getElementById("rounds-played");
+                            rounds.textContent = parseInt(rounds.textContent) + 1;
+                            if(rounds.textContent.length === 1) rounds.textContent = "0" + rounds.textContent;
+                            statuses = [];
+                            }
+                        }, 500);
                     }
                 }
             };
