@@ -766,7 +766,7 @@ const gameSetUp = (() => {
                             if(rounds.textContent.length === 1) rounds.textContent = "0" + rounds.textContent;
                             statuses = [];
                             }
-                        }, 500);
+                        }, 750);
                     }
                 }
             };
