@@ -1,4 +1,5 @@
 Battleships
+
 A site for playing the popular game Battleships, where users set up their board and attempt to sink all of their opponent’s ships.
 
 ## Installation and Setup Instructions
